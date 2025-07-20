@@ -18,26 +18,26 @@ def create_sample_data():
     # Create librarian
     librarian = Librarian.objects.create(name="Sarah Johnson", library=library)
 
-def query_all_books_by_author(author_name):
+def query_all_books_by_author(author):
     """Query all books by a specific author"""
-    books = Author.objects.filter(author__name=author_name)
-    print(f"Books by {author_name}:")
+    books = Author.objects.get(author=author)
+    print(f"Books by {author}:")
     for book in books:
         print(f"- {book.title}")
 
-def query_all_books_in_library(library_name):
+def query_all_books_in_library(library):
     """List all books in a library"""
-    library = Library.objects.get(name=library_name)
+    library = Library.objects.get(name=library)
     books = library.books.all()
-    print(f"Books in {library_name}:")
+    print(f"Books in {library}:")
     for book in books:
         print(f"- {book.title} (by {book.author.name})")
 
-def query_librarian_for_library(library_name):
+def query_librarian_for_library(library):
     """Retrieve the librarian for a library"""
-    library = Library.objects.get(name=library_name)
+    library = Library.objects.get(name=library)
     librarian = library.librarian
-    print(f"Librarian for {library_name}: {librarian.name}")
+    print(f"Librarian for {library}: {librarian.name}")
 
 if __name__ == "__main__":
     # Create sample data first
