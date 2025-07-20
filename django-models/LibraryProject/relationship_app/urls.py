@@ -16,4 +16,7 @@ urlpatterns = [
     
     # Registration URL
     path('accounts/register/', views.register, name='register'),
+    path('admin-dashboard/', views.admin_view, name='admin-view'),
+    path('librarian-dashboard/', views.librarian_view, name='librarian-view'),
+    path('member-dashboard/', views.member_view, name='member-view'),
 ]

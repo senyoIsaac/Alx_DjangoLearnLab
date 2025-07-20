@@ -12,6 +12,9 @@ from django.contrib.auth import login
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm
 
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .models import UserProfile
+
 # Function-based view to list all books
 def list_books(request):
     books = Book.objects.all()
@@ -25,20 +28,21 @@ class LibraryDetailView(DetailView):
 
 
 def register_view(request):
-    if request.method == 'POST':
+     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            # Assign default role (Member)
+            UserProfile.objects.create(user=user, role='MEMBER')
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
             messages.success(request, "Registration successful!")
-            return redirect('home')  # Replace with your desired redirect
-    else:
-        form = UserCreationForm()
-    return render(request, 'relationship_app/register.html', {'form': form})
-
+            return redirect('member-view')  # Redirect to member dashboard
+        else:
+            form = UserCreationForm()
+        return render(request, 'relationship_app/register.html', {'form': form})
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('home')
@@ -64,3 +68,27 @@ def logout_view(request):
         messages.success(request, "You have been logged out.")
         return redirect('login')
     return render(request, 'relationship_app/logout.html')
+
+def check_admin(user):
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'ADMIN'
+
+def check_librarian(user):
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'LIBRARIAN'
+
+def check_member(user):
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'MEMBER'
+
+@login_required
+@user_passes_test(check_admin)
+def admin_view(request):
+    return render(request, 'relationship_app/admin_view.html')
+
+@login_required
+@user_passes_test(check_librarian)
+def librarian_view(request):
+    return render(request, 'relationship_app/librarian_view.html')
+
+@login_required
+@user_passes_test(check_member)
+def member_view(request):
+    return render(request, 'relationship_app/member_view.html')
